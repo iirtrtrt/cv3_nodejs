@@ -47,29 +47,20 @@ const crawl = async (isLogin) => {
 
       // 쿠키 가져오기
       const cookieValues = cookieJson.map((obj) => obj.value);
-      console.log(cookieValues);
-      //
-      // let cookieValues = [];
-      // cookieJson.forEach((obj) => {
-      //   Object.entries(obj).forEach(([key, value]) => {
-      //     if (key === "value") {
-      //       cookieValues.push(value);
-      //     }
-      //   });
-      // });
+      // console.log(cookieValues);
 
-      // // 분류 JSON 가져오기
+      // 분류 JSON 가져오기
       let gndJson = await gnd(
         cookieValues[0],
         cookieValues[1],
         cookieValues[2],
         cookieValues[3]
       );
-      console.log(gndJson);
+      // console.log(gndJson);
       // const current = gndJson["cats"]["50000013"];
       // console.log(current);
-      // if (current["pid"] == null) {
-      //   const type = gndJson["cats"][current.pid]["name"];
+      // if (current["pid"] != null) {
+      //   const type = gndJson["cats"][current.pid];
       //   console.log(type["name"]);
       // } else {
       //   console.log(current["name"]);
@@ -79,10 +70,24 @@ const crawl = async (isLogin) => {
       const content = await page.content();
       const $ = cheerio.load(content);
       const scriptJson = $("#__NEXT_DATA__");
-      data = JSON.parse($(scriptJson).text());
-      // console.log(JSON.stringify(json));
+      const json = JSON.parse($(scriptJson).text());
 
-      return data;
+      const types = json["props"]["pageProps"]["labang_ranking"].map((obj) => {
+        const current = gndJson["cats"][obj.cid];
+
+        if (current["pid"] !== null) {
+          const type = gndJson["cats"][current.pid];
+          // obj.type = type["name"];
+          return type["name"];
+        } else {
+          // obj.type = current["name"];
+          return current["name"];
+        }
+      });
+      console.log(types);
+      // console.log(json["props"]["pageProps"]["labang_ranking"]);
+
+      return json;
     } else {
       // 로그인이 안됐을 경우
       console.log("error");
