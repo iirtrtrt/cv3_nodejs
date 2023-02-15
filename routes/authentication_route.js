@@ -1,5 +1,4 @@
 const express = require("express");
-const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const Users = require("../models/users");
 const { createTokens, validateToken } = require("../utils/jwt");
@@ -18,16 +17,16 @@ router.post("/register", async (req, res, next) => {
         password: hash,
       })
         .then(() => {
-          res.json("The account is created");
+          res.status(201).json("The account is created");
         })
         .catch((err) => {
           if (err) {
-            res.json({ error: err });
+            res.status(404).json({ error: err });
           }
         });
     });
   } else {
-    res.json("The email is not unique");
+    res.status(405).json("The email is not unique");
   }
 });
 
@@ -37,40 +36,44 @@ router.post("/login", async (req, res, next) => {
   const user = await Users.findOne({ where: { email: req.body.email } });
 
   if (!user) {
-    res.json({ error: "No account" });
+    res.status(404).json({ error: "No account" });
   } else {
     const dbPassword = user.password;
     bcrypt.compare(password, dbPassword).then((match) => {
       if (!match) {
-        res.json({ error: "Password error" });
+        res.status(404).json({ error: "Password error" });
       } else {
         const accessToken = createTokens(user);
 
         res.cookie("access-token", accessToken, {
-          maxAge: 60 * 60 * 24 * 30 * 1000,
+          maxAge: 7 * 60 * 60 * 24 * 1000,
           httpOnly: true,
         });
 
-        res.json({ accessToken: accessToken });
+        res.status(201).json({ accessToken: accessToken });
       }
     });
   }
 });
 
-router.post("/logout", validateToken, async (req, res, next) => {
+router.get("/validate_token", validateToken, async (req, res, next) => {
   if (req.authenticated) {
-    res.clearCookie("access-token").json("Logout success");
+    res.status(201).json("Good token");
   } else {
-    res.json({ error: "Something error" });
+    res.status(404).json({ error: "Something error" });
   }
 });
 
+router.post("/logout", async (req, res, next) => {
+  console.log("logout success");
+  res.status(201).clearCookie("access-token").json("Logout success");
+});
+
 router.get("/test", validateToken, async (req, res) => {
-  // console.log(req.authenticated);
   if (req.authenticated) {
-    res.json("cookie token works");
+    res.status(201).json("cookie access token works");
   } else {
-    res.json({ error: "Something error" });
+    res.status(404).json({ error: "Something error" });
   }
 });
 
