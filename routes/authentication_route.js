@@ -17,7 +17,7 @@ router.post("/register", async (req, res, next) => {
         password: hash,
       })
         .then(() => {
-          res.status(201).json("The account is created");
+          res.status(201).json({ email: email, password: password });
         })
         .catch((err) => {
           if (err) {

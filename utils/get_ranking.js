@@ -1,9 +1,8 @@
 const puppeteer = require("puppeteer");
 const cheerio = require("cheerio");
 require("dotenv").config();
-// const gnd = require("./gnd");
 
-const crawl = async (isAuthenticated) => {
+const getRanking = async (isAuthenticated) => {
   const browser = await puppeteer.launch({
     executablePath: "/usr/bin/google-chrome-stable",
     headless: true,
@@ -40,37 +39,15 @@ const crawl = async (isAuthenticated) => {
       // 로그인이 성공적일 경우
       console.log("login success");
       await page.reload();
-      // const cookieJson = await page.cookies();
-
-      // 쿠키 values 가져오기
-      // const cookieValues = cookieJson.map((obj) => obj.value);
-
-      // 분류 JSON 가져오기
-      // let gndJson = await gnd(
-      //   cookieValues[0],
-      //   cookieValues[1],
-      //   cookieValues[2],
-      //   cookieValues[3]
-      // );
 
       // 랭킹 JSON 가져오기
       const content = await page.content();
       const $ = cheerio.load(content);
       const scriptData = $("#__NEXT_DATA__");
       const json = JSON.parse($(scriptData).text());
+      const jsonWithHref = addHref(page, json);
 
-      // // 랭킹 JSON에 분류 추가하기
-      // json["props"]["pageProps"]["labang_ranking"].map((obj) => {
-      //   const current = gndJson["cats"][obj.cid];
-
-      //   if (current["pid"] !== null) {
-      //     obj.type = gndJson["cats"][current.pid]["name"];
-      //   } else {
-      //     obj.type = current["name"];
-      //   }
-      // });
-
-      return json["props"]["pageProps"]["labang_ranking"];
+      return jsonWithHref;
     } else {
       // 로그인이 안됐을 경우
       console.log("login error");
@@ -86,11 +63,27 @@ const crawl = async (isAuthenticated) => {
     const $ = cheerio.load(content);
     const scriptData = $("#__NEXT_DATA__");
     json = JSON.parse($(scriptData).text());
+    const jsonWithHref = addHref(page, json);
 
-    return json["props"]["pageProps"]["labang_ranking"];
+    return jsonWithHref;
   }
 
   await browser.close();
 };
 
-module.exports = crawl;
+const addHref = async (page, json) => {
+  console.log(json);
+  const hrefs = await page.$$eval(
+    "#__next > div > div > div > div > div > div.Table_container__cUG9N > table > tbody > tr > td:nth-child(2) > a",
+    (el) =>
+      el.map((obj) => "https://datalab.labangba.com" + obj.getAttribute("href"))
+  );
+
+  json["props"]["pageProps"]["labang_ranking"].map((obj, index) => {
+    obj.link = hrefs[index];
+  });
+
+  return json["props"]["pageProps"]["labang_ranking"];
+};
+
+module.exports = getRanking;
