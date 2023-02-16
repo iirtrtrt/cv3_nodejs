@@ -72,7 +72,6 @@ const getRanking = async (isAuthenticated) => {
 };
 
 const addHref = async (page, json) => {
-  console.log(json);
   const hrefs = await page.$$eval(
     "#__next > div > div > div > div > div > div.Table_container__cUG9N > table > tbody > tr > td:nth-child(2) > a",
     (el) =>
