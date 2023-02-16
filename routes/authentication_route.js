@@ -64,17 +64,4 @@ router.get("/validate_token", validateToken, async (req, res, next) => {
   }
 });
 
-router.post("/logout", async (req, res, next) => {
-  console.log("logout success");
-  res.status(201).clearCookie("access-token").json("Logout success");
-});
-
-router.get("/test", validateToken, async (req, res) => {
-  if (req.authenticated) {
-    res.status(201).json("cookie access token works");
-  } else {
-    res.status(404).json({ error: "Something error" });
-  }
-});
-
 module.exports = router;
