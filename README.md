@@ -20,6 +20,10 @@ LOGIN_EMAIL=라방바이메일<br>
 LOGIN_PASSWORD=라방바비밀번호<br>
 DB_PATH=./db.sqlite3<br>
 ACCESS_TOKEN=anything<br>
+![image](https://user-images.githubusercontent.com/69069300/219335026-3e1c79d2-3bb6-4207-9c42-2a96503ccd64.png)
+![image](https://user-images.githubusercontent.com/69069300/219335205-dce74ff0-f4e5-4262-aaf3-3c1959517a84.png)
+
+
 
 ## Run
 
@@ -27,8 +31,16 @@ ACCESS_TOKEN=anything<br>
 
 This has to work with a front end server, https://github.com/iirtrtrt/cv3_nextjs<br>
 
-Run server:
+1. Install packages:
+
+```sh
+npm install
+```
+
+2. Run server:
 
 ```sh
 npm run start
 ```
+
+서버 실행시, sqlite3 DB는 자동 생성됩니다.
